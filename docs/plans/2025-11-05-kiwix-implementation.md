@@ -29,7 +29,7 @@ type: application
 version: 0.1.0
 appVersion: "latest"
 maintainers:
-  - name: acaudill
+  - name: jacaudi
 dependencies:
   - name: app-template
     version: 4.x.x
@@ -51,7 +51,7 @@ downloader:
   enabled: true
   schedule: ""  # Empty = Job, set = CronJob (e.g., "0 2 * * 0")
   image:
-    repository: ghcr.io/acaudill/kiwix-downloader
+    repository: ghcr.io/jacaudi/kiwix-downloader
     tag: latest
     pullPolicy: IfNotPresent
   resources: {}
@@ -618,7 +618,7 @@ Helm chart for deploying [kiwix-serve](https://github.com/kiwix/kiwix-tools) wit
 helm registry login ghcr.io -u <username>
 
 # Install chart
-helm install my-kiwix oci://ghcr.io/acaudill/charts/kiwix \
+helm install my-kiwix oci://ghcr.io/jacaudi/charts/kiwix \
   --version v0.1.0 \
   --namespace kiwix \
   --create-namespace \
@@ -629,7 +629,7 @@ helm install my-kiwix oci://ghcr.io/acaudill/charts/kiwix \
 
 ```bash
 # Clone repository
-git clone https://github.com/acaudill/kiwix-helm-chart.git
+git clone https://github.com/jacaudi/kiwix-helm-chart.git
 cd kiwix-helm-chart
 
 # Update dependencies
@@ -688,7 +688,7 @@ zimFiles:
 | `zimFiles[].sha256` | SHA256 checksum (optional) | `null` |
 | `downloader.enabled` | Enable downloader controller | `true` |
 | `downloader.schedule` | CronJob schedule (empty = Job) | `""` |
-| `downloader.image.repository` | Downloader image repository | `ghcr.io/acaudill/kiwix-downloader` |
+| `downloader.image.repository` | Downloader image repository | `ghcr.io/jacaudi/kiwix-downloader` |
 | `downloader.image.tag` | Downloader image tag | `latest` |
 | `persistence.data.size` | PVC size | `100Gi` |
 | `persistence.data.storageClass` | Storage class name | `""` (cluster default) |
