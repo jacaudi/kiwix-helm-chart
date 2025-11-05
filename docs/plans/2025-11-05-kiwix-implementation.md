@@ -232,7 +232,7 @@ Generates JSON config from zimFiles list for downloader container
 Create `docker/Dockerfile`:
 
 ```dockerfile
-FROM alpine:3.19
+FROM alpine:3.22
 
 # Install required packages
 RUN apk add --no-cache \
