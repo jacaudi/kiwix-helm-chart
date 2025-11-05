@@ -13,7 +13,7 @@ data:
         {{- if $i }},{{ end }}
         {
           "url": {{ $file.url | quote }},
-          "sha256": {{ $file.sha256 | default "null" }}
+          "sha256": {{ if $file.sha256 }}{{ $file.sha256 | quote }}{{ else }}null{{ end }}
         }
         {{- end }}
       ]
