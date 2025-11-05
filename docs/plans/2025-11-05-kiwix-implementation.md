@@ -2,11 +2,11 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build a Helm chart for deploying kiwix-serve with automated ZIM file downloads using bjw-s app-template as base.
+**Goal:** Build a Helm chart for deploying kiwix-serve with automated ZIM file downloads using bjw-s common library as base.
 
 **Architecture:** Standalone downloader pattern with two controllers (downloader Job/CronJob + kiwix-serve Deployment) sharing a PVC. ConfigMap generated from URL list, custom downloader image with retry/checksum logic. GitHub Actions publishes both chart and container to GHCR in OCI format.
 
-**Tech Stack:** Helm 3, bjw-s app-template 4.x, Alpine Linux, curl, GitHub Actions, GHCR (OCI registry)
+**Tech Stack:** Helm 3, bjw-s common library 4.4.0, Alpine Linux, curl, GitHub Actions, GHCR (OCI registry)
 
 ---
 
@@ -31,8 +31,8 @@ appVersion: "latest"
 maintainers:
   - name: jacaudi
 dependencies:
-  - name: app-template
-    version: 4.x.x
+  - name: common
+    version: 4.4.0
     repository: https://bjw-s-labs.github.io/helm-charts
 ```
 
@@ -164,7 +164,7 @@ Expected: No errors
 git add Chart.yaml values.yaml templates/_helpers.tpl
 git commit -m "feat: add chart foundation with bjw-s dependency
 
-- Chart.yaml with app-template dependency
+- Chart.yaml with common library dependency
 - Initial values.yaml with controllers and persistence
 - Helper templates for naming
 "
@@ -599,7 +599,7 @@ Helm chart for deploying [kiwix-serve](https://github.com/kiwix/kiwix-tools) wit
 - 🚀 Automated ZIM file downloads with retry logic and checksum verification
 - 🔄 One-time or periodic download modes (Job or CronJob)
 - 📦 OCI-based Helm chart distribution via GHCR
-- 🛡️ Built on [bjw-s app-template](https://github.com/bjw-s-labs/helm-charts) common library
+- 🛡️ Built on [bjw-s common library](https://github.com/bjw-s-labs/helm-charts)
 - 💾 Persistent storage with configurable size and storage class
 - 🎯 Keep-all file management strategy for archival use cases
 
@@ -845,7 +845,7 @@ overview, troubleshooting guide, and development setup
 ### Step 1: Update Helm dependencies
 
 Run: `helm dependency update`
-Expected: Downloads bjw-s app-template chart to `charts/`
+Expected: Downloads bjw-s common library chart to `charts/`
 
 ### Step 2: Lint chart
 
@@ -898,7 +898,7 @@ Expected: Successfully builds image
 git add charts/
 git commit -m "chore: add Helm dependencies
 
-Downloaded bjw-s app-template chart
+Downloaded bjw-s common library chart
 "
 ```
 
