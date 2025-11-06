@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
-
 - [`ff74d0c`](https://github.com/jacaudi/kiwix-helm-chart/commit/ff74d0c2b56b5078be30f39c86eac9d63707ea19) refactor: remove pushOptions from Uplift config
 - [`a2cf896`](https://github.com/jacaudi/kiwix-helm-chart/commit/a2cf896a9b121b26376244d7f90a1533f6968aad) fix: add Chart.yaml to CI paths-ignore
 - [`9ccfc91`](https://github.com/jacaudi/kiwix-helm-chart/commit/9ccfc91b88e5de3dba29ed7a90e3eebc679d938e) feat: add consolidated publish workflow with parallel jobs
