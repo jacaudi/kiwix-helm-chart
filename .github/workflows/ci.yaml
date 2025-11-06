@@ -6,6 +6,7 @@ on:
       - main
     paths-ignore:
       - 'CHANGELOG.md'
+      - 'Chart.yaml'
 
 permissions:
   contents: read
