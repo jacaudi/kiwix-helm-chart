@@ -1,37 +1,26 @@
 # Uplift configuration for semantic versioning and changelog generation
 git:
-  message: "chore: release version $VERSION"
+  ignoreDetached: false
 
 bumps:
   # Update Chart.yaml version field
   - file: Chart.yaml
     regex:
-      pattern: 'version: ([0-9]+\.[0-9]+\.[0-9]+)'
-      count: 1
+      - pattern: 'version: ([0-9]+\.[0-9]+\.[0-9]+)'
+        semver: true
+        count: 1
   # Update Chart.yaml appVersion field
   - file: Chart.yaml
     regex:
-      pattern: 'appVersion: "([0-9]+\.[0-9]+\.[0-9]+)"'
-      count: 1
+      - pattern: 'appVersion: "([0-9]+\.[0-9]+\.[0-9]+)"'
+        semver: true
+        count: 1
 
 changelog:
   sort: asc
-  skip:
-    - chore
-    - ci
-    - docs
-    - style
-    - test
-
-commits:
-  types:
-    feat: "Features"
-    fix: "Bug Fixes"
-    perf: "Performance Improvements"
-    refactor: "Code Refactoring"
-    build: "Build System"
-
-github:
-  releases:
-    enabled: true
-    changelog: true
+  exclude:
+    - ^chore
+    - ^ci
+    - ^docs
+    - ^style
+    - ^test
