@@ -211,7 +211,7 @@ kubectl exec -n kiwix deployment/my-kiwix -- rm /data/old-file.zim
 ### Building Downloader Image
 
 ```bash
-cd docker
+cd image
 docker build -t ghcr.io/jacaudi/kiwix-downloader:test .
 docker push ghcr.io/jacaudi/kiwix-downloader:test
 ```
