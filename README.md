@@ -138,6 +138,30 @@ ZIM files can be large (100MB - 100GB). The chart uses a **keep-all** strategy, 
 
 Monitor PVC usage over time, especially when using periodic updates.
 
+## Automated Dependency Updates
+
+This project uses [Renovate](https://github.com/renovatebot/renovate) to automatically keep dependencies up-to-date:
+
+- **GitHub Actions**: Auto-updated to latest versions
+- **Docker base images**: Tracks Alpine Linux releases
+- **Helm dependencies**: Monitors bjw-s common library updates
+- **Container images**: Tracks kiwix-serve and downloader versions
+
+**Schedule:** Daily at 2am UTC
+
+**Auto-merge policy:** Patch updates (1.0.x) automatically merge after 3 days if CI passes.
+
+**Dependency Dashboard:** Check the [Dependency Dashboard](../../issues) issue for pending updates.
+
+### Manual Renovate Run
+
+Trigger Renovate manually via GitHub Actions:
+```bash
+gh workflow run renovate.yaml
+```
+
+Or via GitHub UI: Actions → Renovate → Run workflow
+
 ## Release Workflow
 
 This project uses [Uplift](https://github.com/gembaadvantage/uplift) to automate semantic versioning and releases.
@@ -189,30 +213,6 @@ Uplift will:
 - Trigger Docker and Helm chart publishing
 
 **Quality gates:** Tests and builds must pass before release job runs.
-
-## Automated Dependency Updates
-
-This project uses [Renovate](https://github.com/renovatebot/renovate) to automatically keep dependencies up-to-date:
-
-- **GitHub Actions**: Auto-updated to latest versions
-- **Docker base images**: Tracks Alpine Linux releases
-- **Helm dependencies**: Monitors bjw-s common library updates
-- **Container images**: Tracks kiwix-serve and downloader versions
-
-**Schedule:** Daily at 2am UTC
-
-**Auto-merge policy:** Patch updates (1.0.x) automatically merge after 3 days if CI passes.
-
-**Dependency Dashboard:** Check the [Dependency Dashboard](../../issues) issue for pending updates.
-
-### Manual Renovate Run
-
-Trigger Renovate manually via GitHub Actions:
-```bash
-gh workflow run renovate.yaml
-```
-
-Or via GitHub UI: Actions → Renovate → Run workflow
 
 ## Troubleshooting
 
