@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Trigger release job'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  test:
+    name: Test Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Update dependencies
+        run: helm dependency update
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Template chart (default values)
+        run: helm template test . > /dev/null
+
+      - name: Create test values for Job mode
+        run: |
+          cat > /tmp/test-job.yaml << 'EOF'
+          zimFiles:
+            - url: https://example.com/test.zim
+          downloader:
+            schedule: ""
+          EOF
+
+      - name: Template chart (Job mode)
+        run: |
+          helm template test . -f /tmp/test-job.yaml > /tmp/output-job.yaml
+          grep -q "kind: Job" /tmp/output-job.yaml && echo "✓ Job mode validated"
+
+      - name: Create test values for CronJob mode
+        run: |
+          cat > /tmp/test-cronjob.yaml << 'EOF'
+          zimFiles:
+            - url: https://example.com/test.zim
+          downloader:
+            schedule: "0 2 * * *"
+          EOF
+
+      - name: Template chart (CronJob mode)
+        run: |
+          helm template test . -f /tmp/test-cronjob.yaml > /tmp/output-cronjob.yaml
+          grep -q "kind: CronJob" /tmp/output-cronjob.yaml && echo "✓ CronJob mode validated"
+
+      - name: Verify resource count
+        run: |
+          RESOURCES=$(helm template test . | grep -E "^kind:" | wc -l)
+          if [ "$RESOURCES" -ge 5 ]; then
+            echo "✓ Expected resources rendered: $RESOURCES"
+          else
+            echo "✗ Insufficient resources: $RESOURCES (expected ≥5)"
+            exit 1
+          fi
