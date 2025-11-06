@@ -138,6 +138,58 @@ ZIM files can be large (100MB - 100GB). The chart uses a **keep-all** strategy, 
 
 Monitor PVC usage over time, especially when using periodic updates.
 
+## Release Workflow
+
+This project uses [Uplift](https://github.com/gembaadvantage/uplift) to automate semantic versioning and releases.
+
+### Conventional Commits
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+- `feat:` - New feature (minor version bump)
+- `fix:` - Bug fix (patch version bump)
+- `docs:` - Documentation changes
+- `chore:` - Maintenance tasks
+- `refactor:` - Code refactoring
+- `BREAKING CHANGE:` in footer - Major version bump
+
+**Examples:**
+```bash
+git commit -m "feat: add support for custom ZIM checksums"
+git commit -m "fix: correct CronJob schedule parsing"
+git commit -m "docs: update installation instructions"
+```
+
+### Creating a Release
+
+Releases are created manually via GitHub Actions:
+
+1. Navigate to **Actions** → **CI/CD Pipeline**
+2. Click **Run workflow**
+3. Select `main` branch
+4. Check **Trigger Release** option
+5. Click **Run workflow**
+
+Uplift will:
+- Analyze commits since last release
+- Determine version bump (major/minor/patch)
+- Update `Chart.yaml` version and appVersion
+- Generate/update `CHANGELOG.md`
+- Create git tag (e.g., `v0.2.0`)
+- Create GitHub release with changelog
+- Trigger Docker and Helm chart publishing
+
+**Quality gates:** Tests and builds must pass before release job runs.
+
 ## Automated Dependency Updates
 
 This project uses [Renovate](https://github.com/renovatebot/renovate) to automatically keep dependencies up-to-date:
