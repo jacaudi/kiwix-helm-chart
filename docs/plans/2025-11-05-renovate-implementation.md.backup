@@ -1,0 +1,562 @@
+# Kiwix Chart Completion and Renovate Integration Implementation Plan
+
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+
+**Goal:** Complete remaining Kiwix Helm chart tasks (chart workflow, README, validation) then add automated dependency management with Renovate and update all workflows to latest versions.
+
+**Architecture:** Complete original chart implementation with GitHub Actions workflow for OCI publishing and comprehensive documentation. Then add self-hosted Renovate via GitHub Actions running daily, updating all workflows to latest action versions in the process.
+
+**Tech Stack:** Helm, GitHub Actions, Renovate, OCI registry, bjw-s common library 4.4.0
+
+**Note:** This plan continues from the original kiwix-implementation.md plan. Tasks 1-5 are already complete. This plan covers Tasks 6-8 (original) plus Renovate integration (new).
+
+---
+
+## Task 1: Create Renovate Configuration
+
+**Files:**
+- Create: `renovate.json`
+
+### Step 1: Create renovate.json with comprehensive configuration
+
+Create `renovate.json`:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["at 2am"],
+  "timezone": "UTC",
+  "dependencyDashboard": true,
+  "labels": ["dependencies", "renovate"],
+  "assignees": ["jacaudi"],
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge patch updates after stability period",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Group Docker base images",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["alpine"],
+      "groupName": "Docker base images",
+      "automerge": false
+    },
+    {
+      "description": "Group Helm dependencies",
+      "matchManagers": ["helmv3"],
+      "matchPackageNames": ["common"],
+      "groupName": "Helm dependencies",
+      "automerge": false
+    },
+    {
+      "description": "Track container images in values.yaml",
+      "matchManagers": ["helm-values"],
+      "matchPackageNames": ["ghcr.io/kiwix/kiwix-serve", "ghcr.io/jacaudi/kiwix-downloader"],
+      "groupName": "Container images",
+      "automerge": false
+    }
+  ]
+}
+```
+
+### Step 2: Validate JSON syntax
+
+Run: `cat renovate.json | jq .`
+Expected: Pretty-printed JSON with no errors
+
+### Step 3: Commit
+
+```bash
+git add renovate.json
+git commit -m "feat: add Renovate configuration
+
+- Daily schedule at 2am UTC
+- Auto-merge patch updates after 3 days
+- Group updates by type (Actions, Docker, Helm)
+- Dependency dashboard enabled
+"
+```
+
+---
+
+## Task 2: Create Renovate GitHub Actions Workflow
+
+**Files:**
+- Create: `.github/workflows/renovate.yaml`
+
+### Step 1: Create Renovate workflow
+
+Create `.github/workflows/renovate.yaml`:
+
+```yaml
+name: Renovate
+
+on:
+  schedule:
+    # Run daily at 2am UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@v40
+        with:
+          configurationFile: renovate.json
+          token: ${{ secrets.RENOVATE_TOKEN }}
+        env:
+          LOG_LEVEL: debug
+```
+
+### Step 2: Verify workflow syntax
+
+Run: `cat .github/workflows/renovate.yaml | grep -q "name: Renovate" && echo "OK"`
+Expected: OK
+
+### Step 3: Commit
+
+```bash
+git add .github/workflows/renovate.yaml
+git commit -m "feat: add Renovate GitHub Actions workflow
+
+- Runs daily at 2am UTC
+- Manual trigger via workflow_dispatch
+- Uses RENOVATE_TOKEN secret
+- Debug logging enabled
+"
+```
+
+---
+
+## Task 3: Update Docker Workflow to Latest Actions
+
+**Files:**
+- Modify: `.github/workflows/docker.yaml`
+
+### Step 1: Update actions/checkout to v5
+
+Find and replace in `.github/workflows/docker.yaml`:
+
+**Find:**
+```yaml
+      - name: Checkout
+        uses: actions/checkout@v4
+```
+
+**Replace with:**
+```yaml
+      - name: Checkout
+        uses: actions/checkout@v5
+```
+
+### Step 2: Update docker/build-push-action to v6
+
+Find and replace in `.github/workflows/docker.yaml`:
+
+**Find:**
+```yaml
+      - name: Build and push
+        uses: docker/build-push-action@v5
+```
+
+**Replace with:**
+```yaml
+      - name: Build and push
+        uses: docker/build-push-action@v6
+```
+
+### Step 3: Verify changes
+
+Run: `grep "checkout@v5" .github/workflows/docker.yaml && grep "build-push-action@v6" .github/workflows/docker.yaml && echo "OK"`
+Expected: OK (both patterns found)
+
+### Step 4: Commit
+
+```bash
+git add .github/workflows/docker.yaml
+git commit -m "chore: update Docker workflow to latest actions
+
+- actions/checkout@v4 → @v5
+- docker/build-push-action@v5 → @v6
+"
+```
+
+---
+
+## Task 4: Update Chart Workflow to Use OCI Action
+
+**Files:**
+- Modify: `.github/workflows/chart.yaml`
+
+### Step 1: Update actions/checkout to v5
+
+Find and replace in `.github/workflows/chart.yaml`:
+
+**Find:**
+```yaml
+      - name: Checkout
+        uses: actions/checkout@v4
+```
+
+**Replace with:**
+```yaml
+      - name: Checkout
+        uses: actions/checkout@v5
+```
+
+### Step 2: Replace helm commands with helm-oci-chart-releaser action
+
+Find the section with version extraction and helm push commands:
+
+**Find (approximately lines 30-60):**
+```yaml
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Update Chart.yaml version
+        run: |
+          sed -i "s/^version:.*/version: ${{ steps.version.outputs.version }}/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${{ steps.version.outputs.tag }}\"/" Chart.yaml
+
+      - name: Update dependencies
+        run: helm dependency update
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Template chart
+        run: helm template test . > /dev/null
+
+      - name: Package chart
+        run: helm package .
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Push chart to GHCR
+        run: |
+          helm push ${{ env.CHART_NAME }}-${{ steps.version.outputs.version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
+```
+
+**Replace with:**
+```yaml
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update Chart.yaml version
+        run: |
+          sed -i "s/^version:.*/version: ${{ steps.version.outputs.version }}/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${GITHUB_REF#refs/tags/}\"/" Chart.yaml
+
+      - name: Update dependencies
+        run: helm dependency update
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Template chart
+        run: helm template test . > /dev/null
+
+      - name: Release chart to OCI registry
+        uses: appany/helm-oci-chart-releaser@v0.5.0
+        with:
+          name: kiwix
+          repository: jacaudi/charts
+          tag: ${{ steps.version.outputs.version }}
+          registry: ghcr.io
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Step 3: Remove REGISTRY and CHART_NAME environment variables if present
+
+If these environment variables exist at the top of the file:
+
+**Remove:**
+```yaml
+env:
+  REGISTRY: ghcr.io
+  CHART_NAME: kiwix
+```
+
+They're no longer needed as the action handles them.
+
+### Step 4: Verify changes
+
+Run: `grep "checkout@v5" .github/workflows/chart.yaml && grep "appany/helm-oci-chart-releaser@v0.5.0" .github/workflows/chart.yaml && echo "OK"`
+Expected: OK (both patterns found)
+
+### Step 5: Commit
+
+```bash
+git add .github/workflows/chart.yaml
+git commit -m "refactor: update chart workflow to use OCI action
+
+- actions/checkout@v4 → @v5
+- Replace manual helm commands with appany/helm-oci-chart-releaser@v0.5.0
+- Simplifies workflow and adds built-in retry logic
+- Automatic registry login and chart push
+"
+```
+
+---
+
+## Task 5: Documentation and Secret Setup
+
+**Files:**
+- Modify: `README.md`
+- Create: `docs/RENOVATE.md` (optional)
+
+### Step 1: Add Renovate section to README
+
+Add to `README.md` in the features section:
+
+**Add after existing features:**
+```markdown
+- 🔄 Automated dependency updates with Renovate
+```
+
+**Add new section before "Development":**
+```markdown
+## Automated Dependency Updates
+
+This project uses [Renovate](https://github.com/renovatebot/renovate) to automatically keep dependencies up-to-date:
+
+- **GitHub Actions**: Auto-updated to latest versions
+- **Docker base images**: Tracks Alpine Linux releases
+- **Helm dependencies**: Monitors bjw-s common library updates
+- **Container images**: Tracks kiwix-serve and downloader versions
+
+**Schedule:** Daily at 2am UTC
+
+**Auto-merge policy:** Patch updates (1.0.x) automatically merge after 3 days if CI passes.
+
+**Dependency Dashboard:** Check the [Dependency Dashboard](../../issues) issue for pending updates.
+
+### Manual Renovate Run
+
+Trigger Renovate manually via GitHub Actions:
+```bash
+gh workflow run renovate.yaml
+```
+
+Or via GitHub UI: Actions → Renovate → Run workflow
+```
+
+### Step 2: Create RENOVATE_TOKEN secret documentation
+
+Create `docs/RENOVATE.md`:
+
+```markdown
+# Renovate Setup
+
+## Required Secret: RENOVATE_TOKEN
+
+Renovate requires a GitHub Personal Access Token to create pull requests and trigger workflows.
+
+### Creating the Token
+
+1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Name: `Renovate Token`
+4. Expiration: Set to your preference (90 days, 1 year, or no expiration)
+5. Select scopes:
+   - ✅ `repo` (Full control of private repositories)
+   - ✅ `workflow` (Update GitHub Action workflows)
+6. Click "Generate token"
+7. Copy the token (you won't see it again!)
+
+### Adding to Repository
+
+1. Go to repository Settings → Secrets and variables → Actions
+2. Click "New repository secret"
+3. Name: `RENOVATE_TOKEN`
+4. Value: Paste the token from above
+5. Click "Add secret"
+
+### Verification
+
+After adding the secret, trigger Renovate manually:
+
+```bash
+gh workflow run renovate.yaml
+```
+
+Check the Actions tab for the workflow run. If successful, Renovate will:
+- Create a "Dependency Dashboard" issue
+- Scan for updates
+- Create PRs for any outdated dependencies
+
+## Troubleshooting
+
+**Workflow fails with "Bad credentials"**
+- Check that RENOVATE_TOKEN secret is set correctly
+- Verify token has `repo` and `workflow` scopes
+- Token may have expired - generate a new one
+
+**No PRs created**
+- Dependencies may already be up-to-date
+- Check Dependency Dashboard issue for status
+- Review Renovate logs in workflow run
+
+**Auto-merge not working**
+- Check CI passes on Renovate PRs
+- Verify 3-day minimum release age has passed
+- Confirm package rule allows auto-merge
+```
+
+### Step 3: Commit
+
+```bash
+git add README.md docs/RENOVATE.md
+git commit -m "docs: add Renovate documentation
+
+- Add automated dependency updates section to README
+- Create RENOVATE.md with token setup instructions
+- Document manual trigger process
+"
+```
+
+---
+
+## Task 6: Verification and Testing
+
+**Files:**
+- No file changes, verification only
+
+### Step 1: Validate renovate.json schema
+
+Run: `cat renovate.json | jq . > /dev/null && echo "JSON valid"`
+Expected: JSON valid
+
+### Step 2: Check workflow syntax
+
+Run: `yamllint .github/workflows/renovate.yaml .github/workflows/docker.yaml .github/workflows/chart.yaml || echo "Note: yamllint not installed, skipping"`
+Expected: No errors (or note about yamllint)
+
+### Step 3: Verify all action versions updated
+
+Run: `grep -h "uses:" .github/workflows/*.yaml | sort | uniq`
+Expected output should show:
+```
+      - uses: actions/checkout@v5
+      - uses: appany/helm-oci-chart-releaser@v0.5.0
+      - uses: azure/setup-helm@v4
+      - uses: docker/build-push-action@v6
+      - uses: docker/login-action@v3
+      - uses: docker/metadata-action@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: renovatebot/github-action@v40
+```
+
+### Step 4: Test renovate.json parsing
+
+If `renovate` CLI is available:
+```bash
+renovate-config-validator renovate.json
+```
+Expected: Configuration is valid
+
+If not available, verify with jq:
+```bash
+jq '.extends, .schedule, .packageRules | length' renovate.json
+```
+Expected: Numeric output showing config is parseable
+
+### Step 5: Create summary commit
+
+```bash
+git add -A
+git commit -m "chore: complete Renovate integration
+
+All components implemented:
+- renovate.json configuration
+- renovate.yaml workflow
+- Updated docker.yaml to latest actions
+- Refactored chart.yaml with OCI action
+- Documentation for setup and usage
+
+Next step: Add RENOVATE_TOKEN secret in GitHub UI
+" --allow-empty
+```
+
+---
+
+## Post-Implementation Checklist
+
+After all tasks complete, manual steps required:
+
+- [ ] **Add RENOVATE_TOKEN secret** in GitHub repository settings
+  - Follow instructions in `docs/RENOVATE.md`
+  - Generate Personal Access Token with `repo` and `workflow` scopes
+  - Add as repository secret named `RENOVATE_TOKEN`
+
+- [ ] **Test Renovate workflow**
+  - Trigger manually: `gh workflow run renovate.yaml`
+  - Check workflow succeeds in Actions tab
+  - Verify Dependency Dashboard issue is created
+
+- [ ] **Review first Renovate PRs**
+  - Check grouping works correctly
+  - Verify CI runs on PRs
+  - Confirm labels are applied
+
+- [ ] **Monitor auto-merge**
+  - Wait for patch updates
+  - After 3 days, verify auto-merge triggers
+  - Check PR was merged automatically if CI passed
+
+- [ ] **Adjust configuration if needed**
+  - Fine-tune schedules
+  - Adjust grouping rules
+  - Modify auto-merge policies
+
+## Success Criteria
+
+Implementation is complete when:
+
+1. ✅ renovate.json exists with comprehensive package rules
+2. ✅ renovate.yaml workflow exists and is syntactically valid
+3. ✅ docker.yaml uses checkout@v5 and build-push-action@v6
+4. ✅ chart.yaml uses checkout@v5 and helm-oci-chart-releaser@v0.5.0
+5. ✅ Documentation explains Renovate setup and usage
+6. ✅ All changes committed to feature branch
+7. ⏳ RENOVATE_TOKEN secret added (manual step)
+8. ⏳ Renovate runs successfully (post-merge)
+
+## Notes
+
+- The existing implementation plan (Task 6-8 from original Kiwix chart plan) is still pending
+- This Renovate work can proceed independently
+- After both are complete, merge feature branch to main
+- RENOVATE_TOKEN must be added before Renovate can run
+- First Renovate run will create Dependency Dashboard issue

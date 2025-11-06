@@ -1,0 +1,103 @@
+# Global values for bjw-s common library
+global:
+  fullnameOverride: ""
+  nameOverride: ""
+
+# ZIM files to download
+zimFiles:
+  - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
+    sha256: null
+
+# Downloader controller configuration
+downloader:
+  enabled: true
+  schedule: ""  # Empty = Job, set = CronJob (e.g., "0 2 * * 0")
+  image:
+    repository: ghcr.io/jacaudi/kiwix-downloader
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
+
+# Kiwix-serve controller
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/kiwix/kiwix-serve
+          tag: latest
+          pullPolicy: IfNotPresent
+        args:
+          - --port=8080
+          - /data/*.zim
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8080
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8080
+
+  downloader:
+    enabled: true
+    type: job
+    cronjob:
+      schedule: "{{ .Values.downloader.schedule }}"
+    containers:
+      main:
+        image:
+          repository: "{{ .Values.downloader.image.repository }}"
+          tag: "{{ .Values.downloader.image.tag }}"
+          pullPolicy: "{{ .Values.downloader.image.pullPolicy }}"
+
+# Service configuration
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
+
+# Ingress configuration (disabled by default)
+ingress:
+  main:
+    enabled: false
+    hosts:
+      - host: kiwix.local
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: main
+              port: http
+
+# Shared persistence
+persistence:
+  data:
+    enabled: true
+    type: persistentVolumeClaim
+    accessMode: ReadWriteOnce
+    size: 100Gi
+    storageClass: ""
+    retain: true
+    globalMounts:
+      - path: /data
+
+  config:
+    enabled: true
+    type: configMap
+    name: "{{ include \"bjw-s.common.lib.chart.names.fullname\" $ }}-zim-urls"
+    advancedMounts:
+      downloader:
+        main:
+          - path: /config
+            readOnly: true
