@@ -7,7 +7,7 @@ Helm chart for deploying [kiwix-serve](https://github.com/kiwix/kiwix-tools) wit
 - 🚀 Automated ZIM file downloads with retry logic and checksum verification
 - 🔄 One-time or periodic download modes (Job or CronJob)
 - 📦 OCI-based Helm chart distribution via GHCR
-- 🛡️ Built on [bjw-s common library](https://github.com/bjw-s-labs/helm-charts)
+- 🛡️ Built on the [bjw-s Common library](https://github.com/bjw-s-labs/helm-charts)
 - 💾 Persistent storage with configurable size and storage class
 - 🎯 Keep-all file management strategy for archival use cases
 - 🔄 Automated dependency updates with Renovate
