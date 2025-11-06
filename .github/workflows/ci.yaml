@@ -149,7 +149,6 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     if: github.event.inputs.release && github.ref == 'refs/heads/main'
-    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v5
