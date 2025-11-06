@@ -3,6 +3,12 @@ global:
   fullnameOverride: ""
   nameOverride: ""
 
+# Default pod options
+defaultPodOptions:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: "OnRootMismatch"
+
 # ZIM files to download
 zimFiles:
   - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
@@ -29,7 +35,6 @@ controllers:
           tag: latest
           pullPolicy: IfNotPresent
         args:
-          - --port=8080
           - /data/*.zim
         probes:
           liveness:
@@ -50,14 +55,12 @@ controllers:
   downloader:
     enabled: true
     type: job
-    cronjob:
-      schedule: "{{ .Values.downloader.schedule }}"
     containers:
       main:
         image:
-          repository: "{{ .Values.downloader.image.repository }}"
-          tag: "{{ .Values.downloader.image.tag }}"
-          pullPolicy: "{{ .Values.downloader.image.pullPolicy }}"
+          repository: ghcr.io/jacaudi/kiwix-downloader
+          tag: latest
+          pullPolicy: IfNotPresent
 
 # Service configuration
 service:
@@ -79,6 +82,35 @@ ingress:
             service:
               identifier: main
               port: http
+
+# Gateway API Route configuration (disabled by default)
+# Requires Kubernetes Gateway API CRDs to be installed
+# See: https://gateway-api.sigs.k8s.io/ and docs/ROUTES.md
+route:
+  main:
+    enabled: false
+    kind: HTTPRoute  # HTTPRoute, GRPCRoute, TCPRoute, UDPRoute
+    parentRefs:
+      - name: ""  # Gateway name (required)
+        namespace: ""  # Gateway namespace (required)
+        # sectionName: ""  # Optional: specific listener on the Gateway
+    hostnames:
+      - kiwix.local
+    rules:
+      - backendRefs:
+          - identifier: main  # References service.main
+            # port: 8080  # Port number (auto-detected from service if omitted)
+            # weight: 100  # Traffic weight for load balancing (default: 1)
+        # matches:  # Optional: HTTP matching rules
+        #   - path:
+        #       type: PathPrefix
+        #       value: /
+        # filters:  # Optional: request/response modifications
+        #   - type: RequestHeaderModifier
+        #     requestHeaderModifier:
+        #       add:
+        #         - name: X-Custom-Header
+        #           value: custom-value
 
 # Shared persistence
 persistence:
