@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kiwix
+name: kiwix-helm-chart
 description: Helm chart for deploying kiwix-serve with automated ZIM file downloads
 type: application
 version: 0.1.0
