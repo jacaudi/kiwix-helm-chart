@@ -3,7 +3,7 @@ name: kiwix
 description: Helm chart for deploying kiwix-serve with automated ZIM file downloads
 type: application
 version: 0.1.0
-appVersion: "latest"
+appVersion: "0.1.0"
 maintainers:
   - name: jacaudi
 dependencies:

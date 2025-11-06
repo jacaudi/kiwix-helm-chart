@@ -1,0 +1,26 @@
+# Uplift configuration for semantic versioning and changelog generation
+git:
+  ignoreDetached: false
+
+bumps:
+  # Update Chart.yaml version field
+  - file: Chart.yaml
+    regex:
+      - pattern: 'version: ([0-9]+\.[0-9]+\.[0-9]+)'
+        semver: true
+        count: 1
+  # Update Chart.yaml appVersion field
+  - file: Chart.yaml
+    regex:
+      - pattern: 'appVersion: "([0-9]+\.[0-9]+\.[0-9]+)"'
+        semver: true
+        count: 1
+
+changelog:
+  sort: asc
+  exclude:
+    - ^chore
+    - ^ci
+    - ^docs
+    - ^style
+    - ^test
