@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
 
+- [`9be21cc`](https://github.com/jacaudi/kiwix-helm-chart/commit/9be21cc2b88d4d97da1b75e0278e97436da07419) fix: specify chart path in OCI release action
+- [`e62fa40`](https://github.com/jacaudi/kiwix-helm-chart/commit/e62fa40823dd76302105d28221151c5f154e0236) fix: add push options to uplift configuration for CI skipping
+
+## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
+
 - [`442dc57`](https://github.com/jacaudi/kiwix-helm-chart/commit/442dc577ef4bfebf0e5eab1bdea9da6d369762e9) fix: use PAT instead of GITHUB_TOKEN for release workflow
 - [`91dcf7a`](https://github.com/jacaudi/kiwix-helm-chart/commit/91dcf7a3aa79e81bbfdb20ac59c48b44e316f3d9) fix: correct release workflow to allow manual triggers
 - [`c0f10b1`](https://github.com/jacaudi/kiwix-helm-chart/commit/c0f10b17beb24634e1b24ce4a69219523fd71105) feat: integrate Uplift for automated semantic versioning and releases (#1)

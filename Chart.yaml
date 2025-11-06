@@ -2,8 +2,8 @@ apiVersion: v2
 name: kiwix
 description: Helm chart for deploying kiwix-serve with automated ZIM file downloads
 type: application
-version: 0.1.0
-appVersion: "0.1.0"
+version: 0.1.1
+appVersion: "0.1.1"
 maintainers:
   - name: jacaudi
 dependencies:
