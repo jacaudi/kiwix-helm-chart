@@ -50,6 +50,8 @@ controllers:
   downloader:
     enabled: true
     type: job
+    cronjob:
+      schedule: "{{ .Values.downloader.schedule }}"
     containers:
       main:
         image:

@@ -1,0 +1,5 @@
+{{- /* Set downloader type to cronjob if schedule is provided */ -}}
+{{- if .Values.downloader.schedule -}}
+{{- $_ := set .Values.controllers.downloader "type" "cronjob" -}}
+{{- end -}}
+{{- include "bjw-s.common.loader.all" . }}
