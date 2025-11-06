@@ -1,9 +1,6 @@
 # Uplift configuration for semantic versioning and changelog generation
 git:
   ignoreDetached: false
-  pushOptions:
-    - option: "ci.skip"
-      skipTag: true
 
 bumps:
   # Update Chart.yaml version field
