@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["at 2am"],
+  "timezone": "UTC",
+  "dependencyDashboard": true,
+  "labels": ["dependencies", "renovate"],
+  "assignees": ["jacaudi"],
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge patch updates after stability period",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Group Docker base images",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["alpine"],
+      "groupName": "Docker base images",
+      "automerge": false
+    },
+    {
+      "description": "Group Helm dependencies",
+      "matchManagers": ["helmv3"],
+      "matchPackageNames": ["common"],
+      "groupName": "Helm dependencies",
+      "automerge": false
+    },
+    {
+      "description": "Track container images in values.yaml",
+      "matchManagers": ["helm-values"],
+      "matchPackageNames": ["ghcr.io/kiwix/kiwix-serve", "ghcr.io/jacaudi/kiwix-downloader"],
+      "groupName": "Container images",
+      "automerge": false
+    }
+  ]
+}
