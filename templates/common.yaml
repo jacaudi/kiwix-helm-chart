@@ -1,5 +1,39 @@
-{{- /* Set downloader type to cronjob if schedule is provided */ -}}
-{{- if .Values.downloader.schedule -}}
-{{- $_ := set .Values.controllers.downloader "type" "cronjob" -}}
-{{- end -}}
-{{- include "bjw-s.common.loader.all" . }}
+{{- /*
+Build bjw-s values structure from flat values
+*/ -}}
+{{- $bjwsValues := dict -}}
+
+{{- /* Merge in global */ -}}
+{{- $_ := set $bjwsValues "global" .Values.global -}}
+
+{{- /* Build each section using helpers */ -}}
+{{- $security := include "kiwix.values.security" . | fromYaml -}}
+{{- $_ := set $bjwsValues "defaultPodOptions" $security.defaultPodOptions -}}
+
+{{- $controllers := include "kiwix.values.controllers" . | fromYaml -}}
+{{- $_ := set $bjwsValues "controllers" $controllers.controllers -}}
+
+{{- $service := include "kiwix.values.service" . | fromYaml -}}
+{{- $_ := set $bjwsValues "service" $service.service -}}
+
+{{- $persistence := include "kiwix.values.persistence" . | fromYaml -}}
+{{- $_ := set $bjwsValues "persistence" $persistence.persistence -}}
+
+{{- $ingress := include "kiwix.values.ingress" . | fromYaml -}}
+{{- $_ := set $bjwsValues "ingress" $ingress.ingress -}}
+
+{{- $route := include "kiwix.values.route" . | fromYaml -}}
+{{- $_ := set $bjwsValues "route" $route.route -}}
+
+{{- /* Set defaults for optional bjw-s sections */ -}}
+{{- $_ := set $bjwsValues "rbac" (dict) -}}
+{{- $_ := set $bjwsValues "serviceAccount" (dict) -}}
+{{- $_ := set $bjwsValues "configMaps" (dict) -}}
+{{- $_ := set $bjwsValues "secrets" (dict) -}}
+
+{{- /* Create new root context with bjw-s values */ -}}
+{{- $root := deepCopy . -}}
+{{- $_ := set $root "Values" $bjwsValues -}}
+
+{{- /* Include bjw-s common loader with constructed values */ -}}
+{{- include "bjw-s.common.loader.all" $root }}

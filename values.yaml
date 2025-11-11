@@ -1,135 +1,74 @@
-# Global values for bjw-s common library
+# Global settings
 global:
   fullnameOverride: ""
   nameOverride: ""
 
-# Default pod options
-defaultPodOptions:
-  securityContext:
-    fsGroup: 1000
-    fsGroupChangePolicy: "OnRootMismatch"
+# Application images
+images:
+  kiwix:
+    repository: ghcr.io/kiwix/kiwix-serve
+    tag: latest
+    pullPolicy: IfNotPresent
+  downloader:
+    repository: ghcr.io/jacaudi/kiwix-downloader
+    tag: latest
+    pullPolicy: IfNotPresent
 
 # ZIM files to download
 zimFiles:
   - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
     sha256: null
 
-# Downloader controller configuration
+# Downloader configuration (single source of truth)
 downloader:
   enabled: true
-  schedule: ""  # Empty = Job, set = CronJob (e.g., "0 2 * * 0")
-  image:
-    repository: ghcr.io/jacaudi/kiwix-downloader
-    tag: latest
-    pullPolicy: IfNotPresent
+  schedule: ""  # Empty = Job, cron format (e.g., "0 2 * * 0") = CronJob
   resources: {}
 
-# Kiwix-serve controller
-controllers:
-  main:
-    strategy: Recreate
-    containers:
-      main:
-        image:
-          repository: ghcr.io/kiwix/kiwix-serve
-          tag: latest
-          pullPolicy: IfNotPresent
-        args:
-          - /data/*.zim
-        probes:
-          liveness:
-            enabled: true
-            custom: true
-            spec:
-              httpGet:
-                path: /
-                port: 8080
-          readiness:
-            enabled: true
-            custom: true
-            spec:
-              httpGet:
-                path: /
-                port: 8080
-
-  downloader:
-    enabled: true
-    type: job
-    containers:
-      main:
-        image:
-          repository: ghcr.io/jacaudi/kiwix-downloader
-          tag: latest
-          pullPolicy: IfNotPresent
+# Main kiwix-serve application
+kiwix:
+  strategy: Recreate
+  args:
+    - /data/*.zim
+  resources: {}
+  probes:
+    liveness:
+      enabled: true
+      path: /
+      port: 8080
+    readiness:
+      enabled: true
+      path: /
+      port: 8080
 
 # Service configuration
 service:
-  main:
-    controller: main
-    ports:
-      http:
-        port: 8080
+  port: 8080
 
-# Ingress configuration (disabled by default)
-ingress:
-  main:
-    enabled: false
-    hosts:
-      - host: kiwix.local
-        paths:
-          - path: /
-            pathType: Prefix
-            service:
-              identifier: main
-              port: http
-
-# Gateway API Route configuration (disabled by default)
-# Requires Kubernetes Gateway API CRDs to be installed
-# See: https://gateway-api.sigs.k8s.io/ and docs/ROUTES.md
-route:
-  main:
-    enabled: false
-    kind: HTTPRoute  # HTTPRoute, GRPCRoute, TCPRoute, UDPRoute
-    parentRefs:
-      - name: ""  # Gateway name (required)
-        namespace: ""  # Gateway namespace (required)
-        # sectionName: ""  # Optional: specific listener on the Gateway
-    hostnames:
-      - kiwix.local
-    rules:
-      - backendRefs:
-          - identifier: main  # References service.main
-            # port: 8080  # Port number (auto-detected from service if omitted)
-            # weight: 100  # Traffic weight for load balancing (default: 1)
-        # matches:  # Optional: HTTP matching rules
-        #   - path:
-        #       type: PathPrefix
-        #       value: /
-        # filters:  # Optional: request/response modifications
-        #   - type: RequestHeaderModifier
-        #     requestHeaderModifier:
-        #       add:
-        #         - name: X-Custom-Header
-        #           value: custom-value
-
-# Shared persistence
+# Storage
 persistence:
-  data:
-    enabled: true
-    type: persistentVolumeClaim
-    accessMode: ReadWriteOnce
-    size: 100Gi
-    storageClass: ""
-    retain: true
-    globalMounts:
-      - path: /data
+  size: 100Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  retain: true
 
-  config:
-    enabled: true
-    type: configMap
-    name: "{{ include \"bjw-s.common.lib.chart.names.fullname\" $ }}-zim-urls"
-    advancedMounts:
-      downloader:
-        main:
-          - path: /config
-            readOnly: true
+# Ingress (disabled by default)
+ingress:
+  enabled: false
+  host: kiwix.local
+  path: /
+  pathType: Prefix
+
+# Gateway API Route (disabled by default)
+route:
+  enabled: false
+  kind: HTTPRoute
+  gateway:
+    name: ""
+    namespace: ""
+  hostname: kiwix.local
+
+# Security settings
+security:
+  fsGroup: 1000
+  fsGroupChangePolicy: "OnRootMismatch"
