@@ -3,7 +3,7 @@ Build route structure from flat values
 */}}
 {{- define "kiwix.values.route" -}}
 route:
-  main:
+  server:
     enabled: {{ .Values.route.enabled }}
     {{- if .Values.route.enabled }}
     kind: {{ .Values.route.kind }}
@@ -14,6 +14,6 @@ route:
       - {{ .Values.route.hostname }}
     rules:
       - backendRefs:
-          - identifier: main
+          - identifier: server
     {{- end }}
 {{- end -}}

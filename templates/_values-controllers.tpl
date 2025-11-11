@@ -3,7 +3,7 @@ Build controllers structure from flat values
 */}}
 {{- define "kiwix.values.controllers" -}}
 controllers:
-  main:
+  server:
     strategy: {{ .Values.kiwix.strategy }}
     containers:
       main:
