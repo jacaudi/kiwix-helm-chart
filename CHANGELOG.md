@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
+
+- [`28abad9`](https://github.com/jacaudi/kiwix-helm-chart/commit/28abad97ee3d3fa48a951b14f3182a85b198a68e) refactor(release): remove confirmation input for release creation
+- [`03c0863`](https://github.com/jacaudi/kiwix-helm-chart/commit/03c0863aabaa224c4defefda7f263146672045de) fix(changelog): add missing text for tag links
+- [`7234bdb`](https://github.com/jacaudi/kiwix-helm-chart/commit/7234bdb7fe3b2442ac6df17756d7bbd9947a0e2a) fix: correct changelog.md
+
 ## [v0.4.0](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/v0.4.0) - 2025-11-11
 
 - [`58d0eeb`](https://github.com/jacaudi/kiwix-helm-chart/commit/58d0eeb1fa377521680dd9ddbd290863a6ae8b6d) feat: add configurable pod expiration for downloader (#2)
