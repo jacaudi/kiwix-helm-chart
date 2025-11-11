@@ -53,58 +53,21 @@ helm install my-kiwix . \
 
 ## Configuration
 
-### Basic Example
+See [docs/VALUES.md](docs/VALUES.md) for complete values documentation.
+
+### Quick Start Values
 
 ```yaml
-zimFiles:
-  - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
-  - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-09.zim
-
+# Minimal configuration
 persistence:
-  data:
-    size: 50Gi
+  size: 100Gi
+
+ingress:
+  enabled: true
+  host: kiwix.local
 ```
 
-### Periodic Updates (CronJob)
-
-```yaml
-zimFiles:
-  - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
-
-downloader:
-  schedule: "0 2 * * 0"  # Weekly on Sunday at 2am
-
-persistence:
-  data:
-    size: 200Gi
-    storageClass: ceph-block
-```
-
-### With Checksum Verification
-
-```yaml
-zimFiles:
-  - url: https://download.kiwix.org/zim/wikipedia_en_100_2025-10.zim
-    sha256: abc123def456...
-```
-
-### Configuration Options
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `zimFiles` | List of ZIM file URLs to download | `[]` |
-| `zimFiles[].url` | URL of ZIM file | Required |
-| `zimFiles[].sha256` | SHA256 checksum (optional) | `null` |
-| `downloader.enabled` | Enable downloader controller | `true` |
-| `downloader.schedule` | CronJob schedule (empty = Job) | `""` |
-| `downloader.image.repository` | Downloader image repository | `ghcr.io/jacaudi/kiwix-downloader` |
-| `downloader.image.tag` | Downloader image tag | `latest` |
-| `persistence.data.size` | PVC size | `100Gi` |
-| `persistence.data.storageClass` | Storage class name | `""` (cluster default) |
-| `service.main.ports.http.port` | HTTP service port | `8080` |
-| `ingress.main.enabled` | Enable ingress | `false` |
-
-See `values.yaml` for complete configuration options.
+For production deployments, see [docs/VALUES.md](docs/VALUES.md) for examples.
 
 ## Architecture
 
