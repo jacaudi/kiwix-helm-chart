@@ -59,7 +59,7 @@ for i in $(seq 0 $((FILE_COUNT - 1))); do
     while [[ $ATTEMPT -le $MAX_RETRIES ]]; do
         log "Download attempt $ATTEMPT/$MAX_RETRIES: $URL"
 
-        if curl -L -f -S --progress-bar -o "$FILEPATH" "$URL"; then
+        if curl -L -f -o "$FILEPATH" "$URL" 2>&1; then
             SUCCESS=true
             break
         else
