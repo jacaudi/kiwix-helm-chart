@@ -24,6 +24,8 @@ downloader:
   enabled: true
   schedule: ""  # Empty = Job, cron format (e.g., "0 2 * * 0") = CronJob
   resources: {}
+  maxRuntime: 3600      # Maximum seconds pod can run (activeDeadlineSeconds)
+  cleanupAfter: 3600    # Seconds after completion before pod is deleted (ttlSecondsAfterFinished)
 
 # Main kiwix-serve application
 kiwix:

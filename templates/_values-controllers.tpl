@@ -37,8 +37,21 @@ controllers:
     type: cronjob
     cronjob:
       schedule: {{ .Values.downloader.schedule | quote }}
+      {{- with .Values.downloader.maxRuntime }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.downloader.cleanupAfter }}
+      ttlSecondsAfterFinished: {{ . }}
+      {{- end }}
     {{- else }}
     type: job
+    job:
+      {{- with .Values.downloader.maxRuntime }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.downloader.cleanupAfter }}
+      ttlSecondsAfterFinished: {{ . }}
+      {{- end }}
     {{- end }}
     containers:
       main:
