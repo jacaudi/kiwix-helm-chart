@@ -2,12 +2,6 @@ name: Release
 
 on:
   workflow_dispatch:
-    inputs:
-      confirm:
-        description: 'Create release (will analyze commits and bump version)'
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -17,8 +11,16 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    if: github.event.inputs.confirm && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
+      - name: Check authorization
+        if: github.actor != github.repository_owner
+        run: |
+          echo "❌ Only the repository owner can trigger releases"
+          echo "Actor: ${{ github.actor }}"
+          echo "Owner: ${{ github.repository_owner }}"
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
