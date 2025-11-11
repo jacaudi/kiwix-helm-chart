@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
-
 - [`76a2e9d`](https://github.com/jacaudi/kiwix-helm-chart/commit/76a2e9d5139035c3c106ae1da53d40924aea42e0) feat: add Gateway API Routes documentation and update values.yaml for route configuration
 
 - [`ff74d0c`](https://github.com/jacaudi/kiwix-helm-chart/commit/ff74d0c2b56b5078be30f39c86eac9d63707ea19) refactor: remove pushOptions from Uplift config

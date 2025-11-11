@@ -24,3 +24,7 @@ changelog:
     - ^docs
     - ^style
     - ^test
+
+# Enable GitHub release creation
+github:
+  release: true
