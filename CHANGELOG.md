@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
+
+- [`1a4c7c8`](https://github.com/jacaudi/kiwix-helm-chart/commit/1a4c7c8d5d0ff044e027b839a3fb406a1bff0934) fix: remove GitHub release configuration from uplift settings
+- [`e2c6916`](https://github.com/jacaudi/kiwix-helm-chart/commit/e2c691676452bfd24ed1c7d81cf73789dd0c1f06) fix: remove malformed changelog entry and enable GitHub releases
+- [`5526b5e`](https://github.com/jacaudi/kiwix-helm-chart/commit/5526b5e731975a5bb23215fe1e19263191d14518) fix: add missing defaultPodOptions defaults to _values-security.tpl
+- [`3e2d6b4`](https://github.com/jacaudi/kiwix-helm-chart/commit/3e2d6b4f13cb756f52046df72f285a292f02fb12) refactor: implement hybrid flat values structure
+
 - [`76a2e9d`](https://github.com/jacaudi/kiwix-helm-chart/commit/76a2e9d5139035c3c106ae1da53d40924aea42e0) feat: add Gateway API Routes documentation and update values.yaml for route configuration
 
 - [`ff74d0c`](https://github.com/jacaudi/kiwix-helm-chart/commit/ff74d0c2b56b5078be30f39c86eac9d63707ea19) refactor: remove pushOptions from Uplift config
