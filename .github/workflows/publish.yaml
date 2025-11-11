@@ -97,3 +97,69 @@ jobs:
           registry: ghcr.io
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [publish-docker, publish-chart]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get current and previous tags
+        id: tags
+        run: |
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          echo "current=$CURRENT_TAG" >> $GITHUB_OUTPUT
+
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 ${CURRENT_TAG}^ 2>/dev/null || echo "")
+          echo "previous=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          CURRENT_TAG="${{ steps.tags.outputs.current }}"
+          PREV_TAG="${{ steps.tags.outputs.previous }}"
+
+          if [ -z "$PREV_TAG" ]; then
+            # First release - use all commits
+            COMMITS=$(git log --pretty=format:"- %s (%h)" | grep -v "ci(uplift)")
+          else
+            # Get commits since previous tag
+            COMMITS=$(git log --pretty=format:"- %s (%h)" ${PREV_TAG}..${CURRENT_TAG} | grep -v "ci(uplift)")
+          fi
+
+          # Create release notes
+          cat << EOF > release-notes.md
+          ## What's Changed
+
+          $COMMITS
+
+          ## Artifacts
+
+          - **Docker Image**: \`ghcr.io/jacaudi/kiwix-downloader:${CURRENT_TAG}\` (linux/amd64, linux/arm64)
+          - **Helm Chart**: \`oci://ghcr.io/jacaudi/kiwix-helm-chart\` (version ${CURRENT_TAG#v})
+
+          ## Installation
+
+          \`\`\`bash
+          helm install kiwix oci://ghcr.io/jacaudi/kiwix-helm-chart --version ${CURRENT_TAG#v}
+          \`\`\`
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}
+          EOF
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.tags.outputs.current }}" \
+            --title "${{ steps.tags.outputs.current }}" \
+            --notes-file release-notes.md \
+            --latest
