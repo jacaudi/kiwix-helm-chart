@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
 
+- [`e67b0c0`](https://github.com/jacaudi/kiwix-helm-chart/commit/e67b0c07d81a206ffde5be89e9cc9da50d152c58) refactor: rename 'main' to 'server' in values templates for consistency
+- [`b607965`](https://github.com/jacaudi/kiwix-helm-chart/commit/b6079650c55fb6b97864d93cdd807e3d4dad3f0f) fix: remove progress bar from curl command in downloader script
+- [`6226c22`](https://github.com/jacaudi/kiwix-helm-chart/commit/6226c226b318c747dc9047d47959b4881ec69e10) feat: automate GitHub release creation after artifacts publish
+
+## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
+
 - [`1a4c7c8`](https://github.com/jacaudi/kiwix-helm-chart/commit/1a4c7c8d5d0ff044e027b839a3fb406a1bff0934) fix: remove GitHub release configuration from uplift settings
 - [`e2c6916`](https://github.com/jacaudi/kiwix-helm-chart/commit/e2c691676452bfd24ed1c7d81cf73789dd0c1f06) fix: remove malformed changelog entry and enable GitHub releases
 - [`5526b5e`](https://github.com/jacaudi/kiwix-helm-chart/commit/5526b5e731975a5bb23215fe1e19263191d14518) fix: add missing defaultPodOptions defaults to _values-security.tpl
