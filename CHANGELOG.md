@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [v0.4.0](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/v0.4.0) - 2025-11-11
+
+- [`58d0eeb`](https://github.com/jacaudi/kiwix-helm-chart/commit/58d0eeb1fa377521680dd9ddbd290863a6ae8b6d) feat: add configurable pod expiration for downloader (#2)
+
 ## [](https://github.com/jacaudi/kiwix-helm-chart/releases/tag/) - 0001-01-01
 
 - [`e67b0c0`](https://github.com/jacaudi/kiwix-helm-chart/commit/e67b0c07d81a206ffde5be89e9cc9da50d152c58) refactor: rename 'main' to 'server' in values templates for consistency
