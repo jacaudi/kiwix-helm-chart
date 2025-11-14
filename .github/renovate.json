@@ -1,11 +1,26 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "schedule": ["at 2am"],
-  "timezone": "UTC",
-  "dependencyDashboard": true,
-  "labels": ["dependencies", "renovate"],
-  "assignees": ["jacaudi"],
+  "extends": [
+      "config:recommended",
+      ":dependencyDashboard",
+      ":disableRateLimiting",
+      ":timezone(America/Los_Angeles)",
+      ":semanticCommits"
+    ],
+  "labels": [
+    "renovate"
+  ],
+  "assignees": [
+    "jacaudi"
+  ],
+  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+    "suppressNotifications": [
+      "prEditedNotification",
+      "prIgnoreNotification"
+    ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "packageRules": [
     {
       "description": "Group all GitHub Actions updates",
