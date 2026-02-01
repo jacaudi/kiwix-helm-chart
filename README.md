@@ -244,6 +244,12 @@ helm template test . --values values.yaml
 helm install test . --dry-run --debug
 ```
 
+## Acknowledgements
+
+This project stands on the shoulders of giants:
+
+- **[bjw-s](https://github.com/bjw-s)** - For the excellent [helm-charts](https://github.com/bjw-s-labs/helm-charts) library and app-template that powers this Helm chart. The common library pattern has been invaluable.
+
 ## License
 
 See repository license.
